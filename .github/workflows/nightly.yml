@@ -1,0 +1,72 @@
+name: Nightly Build
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # run at 2 AM UTC
+  workflow_dispatch:
+
+jobs:
+  Build:
+    name: Nightly integration build
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        node-version: [12, 14]
+        os: [ubuntu-latest]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v2-beta
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Check cache
+        uses: actions/cache@v2
+        id: node-cache # use this to check for `cache-hit` (`steps.node-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-node-modules-${{ matrix.node-version }}-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install node modules
+        if: steps.node-cache.outputs.cache-hit != 'true'
+        run: npm ci
+        env:
+          CI: true
+
+      - name: Build artifact
+        run: npm run build -- --configuration=production
+
+  # notify_on_failure:
+  #   needs: [nighlty]
+
+  #   if: failure()
+
+  #   name: Slack Notify
+
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
+
+  #     - name: Slack Notification
+  #       uses: rtCamp/action-slack-notify@master
+  #       env:
+  #         SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+  #         SLACK_CHANNEL: _log
+  #         SLACK_USERNAME: 'Nx Starter Bot'
+  #         SLACK_ICON_EMOJI: 'rabo-algemeen-godzilla'
+  #         SLACK_COLOR: 'danger'
+  #         SLACK_TITLE: 'The nightly build is failing :warning:'
+  #         SLACK_FOOTER: ':squirrel:'
+  #         MSG_MINIMAL: true
+# Docs / info
+# Used actions:
+# - https://github.com/marketplace/actions/slack-notify
