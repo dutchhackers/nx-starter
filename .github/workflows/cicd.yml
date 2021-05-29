@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: ['myapp', 'myapp2']
+        app: ['myapp']
     env:
       APP_NAME: ${{ matrix.app }}
     steps:
