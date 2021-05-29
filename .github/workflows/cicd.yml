@@ -112,7 +112,7 @@ jobs:
 
       - name: Prepare deploy
         run: |
-          cp -f ${{ env.APP_PATH }}/server/firebase.json ./
+          cp -f apps/${{ env.APP_ID }}/server/firebase.json ./
 
       - uses: FirebaseExtended/action-hosting-deploy@v0
         id: action-hosting-deploy-svelte
