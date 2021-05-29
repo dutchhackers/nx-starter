@@ -51,7 +51,7 @@ jobs:
       SKIP_JOB: "contains(github.event.pull_request.labels.*.name, 'app: ${{ matrix.app }}')"
     steps:
       - name: Checkout code
-        if: '$SKIP_JOB == true'
+        if: '${{ $SKIP_JOB }} == true'
         uses: actions/checkout@v2
         with:
           fetch-depth: '0'
