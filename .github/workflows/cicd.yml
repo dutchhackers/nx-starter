@@ -86,7 +86,7 @@ jobs:
   #################################################################################
 
   CreatePreview:
-    name: Preview URL (${{ env.APP_ID }})
+    name: Preview URL
     needs: [BuildArtifacts]
     runs-on: ubuntu-latest
     strategy:
