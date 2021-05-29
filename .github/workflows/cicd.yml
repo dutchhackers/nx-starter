@@ -77,8 +77,8 @@ jobs:
       - name: Archive artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: artifacts
-          path: dist/apps
+          name: dist
+          path: dist
 
   #################################################################################
   # Environment: Preview Channels
@@ -94,7 +94,7 @@ jobs:
         app: ['myapp']
     env:
       APP_ID: ${{ matrix.app }}
-      APP_PATH: 'apps/${{ matrix.app }}'
+      APP_PATH: 'dist/apps/${{ matrix.app }}'
     # environment:
     #   name: Preview Channels
     #   url: ${{ steps.action-hosting-deploy.outputs.details_url }}
@@ -103,12 +103,15 @@ jobs:
 
       - uses: actions/download-artifact@master
         with:
-          name: artifacts
-          path: dist
+          path: ./
+
+      - name: echo
+        run: |
+          ls -l
 
       - name: Prepare deploy
         run: |
-          cp -f apps/${{ env.APP_PATH }}/server/firebase.json ./
+          cp -f ${{ env.APP_PATH }}/server/firebase.json ./
 
       - uses: FirebaseExtended/action-hosting-deploy@v0
         id: action-hosting-deploy-svelte
