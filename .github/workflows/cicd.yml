@@ -77,8 +77,8 @@ jobs:
       - name: Archive artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: dist
-          path: dist
+          name: artifacts
+          path: dist/apps
 
   #################################################################################
   # Environment: Preview Channels
@@ -103,7 +103,8 @@ jobs:
 
       - uses: actions/download-artifact@master
         with:
-          path: ./
+          name: artifacts
+          path: dist/apps
 
       - name: echo
         run: |
