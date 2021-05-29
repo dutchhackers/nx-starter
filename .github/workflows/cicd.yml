@@ -77,8 +77,8 @@ jobs:
       - name: Archive artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: dist/apps
-          path: artifacts
+          name: artifacts
+          path: dist/apps
 
   Release:
     needs: [BuildArtifacts]
