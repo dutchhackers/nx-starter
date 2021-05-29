@@ -98,7 +98,6 @@ jobs:
 
   Finalize:
     needs: [Build]
-    if: 'true == false'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
