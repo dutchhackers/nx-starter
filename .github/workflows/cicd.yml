@@ -76,7 +76,7 @@ jobs:
         run: npm run build --${{ env.APP_NAME }} --configuration=production
 
       - name: Archive artifacts
-        if: "contains(github.event.pull_request.labels.*.name, 'app: ${{ env.APP_NAME }}')"
+        if: "contains(github.event.pull_request.labels.*.name, 'app: ${{ matrix.app }}')"
         uses: actions/upload-artifact@v2
         with:
           name: dist
