@@ -65,7 +65,9 @@ jobs:
         run: echo "no operation (nop)"
 
       - name: output file ${{ env.APP_NAME }}
-        run: echo test > ${{ env.APP_NAME }}.md
+        run: |
+          mkdir artifacts
+          echo test > artifacts/${{ env.APP_NAME }}.md
 
       - name: ls
         run: ls -al
@@ -74,7 +76,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: ${{ env.APP_NAME }}
-          path: ${{ env.APP_NAME }}.md
+          path: artifacts
 
   Shutdown:
     needs: PostBuild
