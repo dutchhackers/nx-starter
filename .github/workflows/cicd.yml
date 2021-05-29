@@ -51,6 +51,8 @@ jobs:
     strategy:
       matrix:
         app: ['app1', 'app2']
+    env:
+      APP_NAME: ${{ matrix.app }}
     steps:
       - uses: actions/checkout@v2
 
@@ -59,5 +61,5 @@ jobs:
           name: artifacts
           path: dist
 
-      - name: nop for app ${{ matrix.app }}
+      - name: nop for app ${{ env.APP_NAME }}
         run: echo "no operation (nop)"
