@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 jobs:
   BuildCi:
-    name: CI build
+    name: Build CI job
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -41,7 +41,7 @@ jobs:
 
   BuildArtifacts:
     needs: [BuildCi]
-    name: Build artifacts job
+    name: Build Artifacts job
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -80,8 +80,24 @@ jobs:
           name: dist
           path: dist
 
-  Finalize:
+  Release:
     needs: [BuildArtifacts]
+    name: Release job
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/download-artifact@v2
+        with:
+          path: artifacts
+
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: artifacts
+
+  Finalize:
+    needs: [BuildArtifacts, Release]
+    name: Finalize job
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
