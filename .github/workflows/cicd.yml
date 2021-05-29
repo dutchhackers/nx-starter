@@ -41,6 +41,7 @@ jobs:
 
   Build:
     needs: [Setup]
+    if: matrix.app == 'myapp'
     name: Build job
     runs-on: ubuntu-latest
     strategy:
