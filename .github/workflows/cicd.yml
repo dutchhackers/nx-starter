@@ -77,8 +77,8 @@ jobs:
       - name: Archive artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: dist
-          path: dist
+          name: dist/apps
+          path: artifacts
 
   Release:
     needs: [BuildArtifacts]
@@ -105,7 +105,7 @@ jobs:
 
       - name: Install node modules
         if: steps.node-cache.outputs.cache-hit != 'true'
-        run: npm ci
+        run: npm ci --production
 
       - uses: actions/download-artifact@v2
         with:
@@ -115,25 +115,23 @@ jobs:
         run: ls -R
         working-directory: artifacts
 
-      - name: Prepare artifacts folder
-        working-directory: ${{ github.workspace }}
-        run: mkdir artifacts
-
-      - name: Move archived files to artifacts
-        working-directory: ${{ github.workspace }}
-        run: mv dist/apps/* artifacts/
-
+      # - name: Prepare artifacts folder
+      #   run: mkdir artifacts
+      #   working-directory: artifacts
+      # - name: Move archived files to artifacts
+      #   working-directory: ${{ github.workspace }}
+      #   run: mv dist/apps/* artifacts/
       - name: Semantic release
         run: echo "Skip release" #npx semantic-release
         # env:
         #   GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         #   HUSKY_SKIP_HOOKS: 1
 
-      - name: Archive artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: dist
-          path: dist
+      # - name: Archive artifacts
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: dist
+      #     path: dist
 
   Finalize:
     needs: [BuildArtifacts, Release]
