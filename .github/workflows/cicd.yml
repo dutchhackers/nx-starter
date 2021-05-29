@@ -40,15 +40,15 @@ jobs:
           affected: 'true'
 
   Build:
+    if: "contains(github.event.pull_request.labels.*.name, 'app: ${{ matrix.app }}')"
     needs: [Setup]
     name: Build job
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: ['myapp']
+        app: ['myapp', 'myapp2']
     env:
       APP_NAME: ${{ matrix.app }}
-    if: "contains(github.event.pull_request.labels.*.name, 'app: ${{ env.APP_NAME }}')"
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
