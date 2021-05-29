@@ -13,6 +13,10 @@ jobs:
     strategy:
       matrix:
         app: ['myapp', 'myapp2']
+        skip_lint: [false]
+        include:
+          - app: 'myapp2'
+            skip_lint: true
     env:
       APP_NAME: ${{ matrix.app }}
     steps:
@@ -37,6 +41,9 @@ jobs:
       - name: Install node modules
         if: steps.node-cache.outputs.cache-hit != 'true'
         run: npm ci
+
+      - name: Skip lint for ${{ env.APP_NAME }}
+        run: echo ${{ matrix.skip_lint }}
 
       - name: Lint apps
         uses: mansagroup/nrwl-nx-action@v2.0.3
