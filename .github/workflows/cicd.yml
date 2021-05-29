@@ -9,6 +9,11 @@ on:
 jobs:
   Build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: ['app1', 'app2']
+    env:
+      APP_NAME: ${{ matrix.app }}
 
     steps:
       - name: Checkout code
