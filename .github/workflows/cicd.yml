@@ -40,15 +40,12 @@ jobs:
           affected: 'true'
 
   Build:
+    needs: [Setup]
     name: Build job
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: ['myapp']
-        skip_lint: [false]
-        include:
-          - app: 'myapp2'
-            skip_lint: true
+        app: ['myapp', 'myapp2']
     env:
       APP_NAME: ${{ matrix.app }}
     steps:
@@ -74,33 +71,30 @@ jobs:
         if: steps.node-cache.outputs.cache-hit != 'true'
         run: npm ci
 
-      - name: Skip lint for ${{ env.APP_NAME }}
-        run: echo ${{ matrix.skip_lint }}
+      - name: Build app (${{ env.APP_NAME }})
+        # if: "contains(github.event.pull_request.labels.*.name, 'app: ${{ env.APP_NAME }}')"
+        run: npm run build --${{ env.APP_NAME }} --configuration=production
 
-      - name: Lint apps
-        uses: mansagroup/nrwl-nx-action@v2.0.3
-        with:
-          projects: ${{ env.APP_NAME }}
-          targets: lint
-          affected: 'true'
-
-      - name: nop for app ${{ env.APP_NAME }}
-        run: echo "no operation (nop)"
-
-      - name: output file ${{ env.APP_NAME }}
-        run: |
-          mkdir artifacts
-          echo test > artifacts/${{ env.APP_NAME }}.md
-
-      - name: ls
-        run: ls -al
-
-      - name: Archive artifact
-        if: 'true == false'
+      - name: Archive artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ env.APP_NAME }}
-          path: artifacts
+          name: dist
+          path: dist
+
+      # - name: output file ${{ env.APP_NAME }}
+      #   run: |
+      #     mkdir artifacts
+      #     echo test > artifacts/${{ env.APP_NAME }}.md
+
+      # - name: ls
+      #   run: ls -al
+
+      # - name: Archive artifact
+      #   if: 'true == false'
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: ${{ env.APP_NAME }}
+      #     path: artifacts
 
   Finalize:
     needs: [Build]
