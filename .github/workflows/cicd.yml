@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: ['myapp', 'myapp2']
+        app: ['myapp']
         skip_lint: [false]
         include:
           - app: 'myapp2'
