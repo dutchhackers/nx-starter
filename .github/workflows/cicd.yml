@@ -82,21 +82,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: actions/download-artifact@master
-        with:
-          name: app1
-          path: dummy.md
-
-      - uses: actions/download-artifact@master
-        with:
-          name: app2
-          # path: dummy.md
-
-      - run: echo "All set"
-
-      - name: ls
-        run: ls -al
-
       - uses: actions/download-artifact@v2
         with:
           path: artifacts
