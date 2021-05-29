@@ -48,7 +48,7 @@ jobs:
         app: ['myapp', 'myapp2']
     env:
       APP_NAME: ${{ matrix.app }}
-      SKIP_JOB: "contains(github.event.pull_request.labels.*.name, 'app: ${{ env.APP_NAME }}')"
+      SKIP_JOB: "contains(github.event.pull_request.labels.*.name, 'app: ${{ matrix.app }}')"
     steps:
       - name: Checkout code
         if: '$SKIP_JOB == true'
