@@ -41,7 +41,6 @@ jobs:
 
   Build:
     needs: [Setup]
-    if: matrix.app == 'myapp'
     name: Build job
     runs-on: ubuntu-latest
     strategy:
@@ -50,13 +49,19 @@ jobs:
     env:
       APP_NAME: ${{ matrix.app }}
     steps:
+      - name: Check skip
+        env:
+          SKIP_JOB: "contains(github.event.pull_request.labels.*.name, 'app: ${{ env.APP_NAME }}')"
+
       - name: Checkout code
+        if: $SKIP_JOB == true
         uses: actions/checkout@v2
         with:
           fetch-depth: '0'
           persist-credentials: false
 
       - name: Use Node 14
+        if: $SKIP_JOB == true
         uses: actions/setup-node@v2-beta
         with:
           node-version: 14
