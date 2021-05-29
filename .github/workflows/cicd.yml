@@ -71,8 +71,8 @@ jobs:
         if: steps.node-cache.outputs.cache-hit != 'true'
         run: npm ci
 
-      - name: Build app (${{ $APP_LABEL }})
-        if: "contains(github.event.pull_request.labels.*.name, '${{ $APP_LABEL }}')"
+      - name: Build app (${{ env.APP_LABEL }})
+        if: "contains(github.event.pull_request.labels.*.name, '${{ env.APP_LABEL }}')"
         run: npm run build --${{ env.APP_NAME }} --configuration=production
         env:
           APP_LABEL: 'app: $APP_NAME'
