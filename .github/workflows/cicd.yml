@@ -45,13 +45,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: ['myapp', 'myapp2']
+        app: ['myapp', 'testapp']
     env:
       APP_NAME: ${{ matrix.app }}
-      SKIP_JOB: "contains(github.event.pull_request.labels.*.name, 'app: ${{ matrix.app }}')"
     steps:
       - name: Checkout code
-        if: '${{ env.SKIP_JOB }} == true'
         uses: actions/checkout@v2
         with:
           fetch-depth: '0'
