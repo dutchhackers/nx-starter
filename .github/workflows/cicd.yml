@@ -106,9 +106,9 @@ jobs:
           name: artifacts
           path: dist/apps
 
-      - name: echo
-        run: |
-          ls -l
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: dist
 
       - name: Prepare deploy
         run: |
