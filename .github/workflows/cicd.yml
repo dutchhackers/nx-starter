@@ -71,7 +71,7 @@ jobs:
         if: steps.node-cache.outputs.cache-hit != 'true'
         run: npm ci
 
-      - name: Build app (${{ env.APP_ID }})
+      - name: Build app ${{ env.APP_ID }}
         run: npm run build --${{ env.APP_ID }} --configuration=production
 
       - name: Archive artifacts
@@ -79,6 +79,44 @@ jobs:
         with:
           name: artifacts
           path: dist/apps
+
+  #################################################################################
+  # Environment: Preview Channels
+  # Preview URL
+  #################################################################################
+
+  CreatePreview:
+    name: Preview URL (${{ env.APP_ID }})
+    needs: [BuildArtifacts]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: ['myapp']
+    env:
+      APP_ID: ${{ matrix.app }}
+      APP_PATH: 'apps/${{ matrix.app }}'
+    # environment:
+    #   name: Preview Channels
+    #   url: ${{ steps.action-hosting-deploy.outputs.details_url }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/download-artifact@master
+        with:
+          name: artifacts
+          path: dist
+
+      - name: Prepare deploy
+        run: |
+          cp -f apps/${{ env.APP_PATH }}/server/firebase.json ./
+
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        id: action-hosting-deploy-svelte
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          projectId: '${{ secrets.PROJECT_ID }}'
+          channelId: ${{ env.APP_ID }}
 
   Release:
     needs: [BuildArtifacts]
