@@ -33,10 +33,10 @@ jobs:
         if: steps.node-cache.outputs.cache-hit != 'true'
         run: npm ci
 
-      - name: Lint apps
+      - name: Build, Lint affected apps
         uses: mansagroup/nrwl-nx-action@v2.0.3
         with:
-          targets: lint
+          targets: build,lint
           affected: 'true'
 
   Build:
