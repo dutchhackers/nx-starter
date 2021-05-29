@@ -7,7 +7,7 @@ on:
     # branches: [develop, main]
   workflow_dispatch:
 jobs:
-  [PreBuild]:
+  PreBuild:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
