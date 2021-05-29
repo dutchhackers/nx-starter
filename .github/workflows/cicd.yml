@@ -9,12 +9,6 @@ on:
 jobs:
   Build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        app: ['app1', 'app2']
-    env:
-      APP_NAME: ${{ matrix.app }}
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -22,17 +16,17 @@ jobs:
           fetch-depth: '0'
           persist-credentials: false
 
-      - name: Use Node.js 16
+      - name: Use Node.js 14
         uses: actions/setup-node@v2-beta
         with:
-          node-version: 16
+          node-version: 14
 
       - name: Check cache
         uses: actions/cache@v2
         id: node-cache # use this to check for `cache-hit` (`steps.node-cache.outputs.cache-hit != 'true'`)
         with:
           path: '**/node_modules'
-          key: ubuntu-latest-node-modules-16-${{ hashFiles('**/package-lock.json') }}
+          key: ubuntu-latest-node-modules-14-${{ hashFiles('**/package-lock.json') }}
 
       - name: Install node modules
         if: steps.node-cache.outputs.cache-hit != 'true'
@@ -78,7 +72,7 @@ jobs:
           name: ${{ env.APP_NAME }}
           path: artifacts
 
-  Shutdown:
+  Finalize:
     needs: PostBuild
     runs-on: ubuntu-latest
     steps:
