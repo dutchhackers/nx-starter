@@ -40,7 +40,7 @@ jobs:
 
   Build:
     name: Build job
-    needs: [Build]
+    needs: [PreBuild]
     runs-on: ubuntu-latest
     strategy:
       matrix:
