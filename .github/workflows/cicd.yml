@@ -56,11 +56,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: actions/download-artifact@master
-        with:
-          name: artifacts
-          path: dist
-
       - name: nop for app ${{ env.APP_NAME }}
         run: echo "no operation (nop)"
 
