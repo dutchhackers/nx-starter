@@ -64,9 +64,15 @@ jobs:
       - name: nop for app ${{ env.APP_NAME }}
         run: echo "no operation (nop)"
 
+      - name: nop for app ${{ env.APP_NAME }}
+        run: echo test > ${{ env.APP_NAME }}.md
+
   Shutdown:
     needs: PostBuild
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - run: echo "All set"
+
+      - name: ls
+        run: ls -al
