@@ -64,8 +64,11 @@ jobs:
       - name: nop for app ${{ env.APP_NAME }}
         run: echo "no operation (nop)"
 
-      - name: nop for app ${{ env.APP_NAME }}
+      - name: output file ${{ env.APP_NAME }}
         run: echo test > ${{ env.APP_NAME }}.md
+
+      - name: ls
+        run: ls -al
 
   Shutdown:
     needs: PostBuild
