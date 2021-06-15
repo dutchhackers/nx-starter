@@ -4,12 +4,12 @@ on:
   push:
     branches: [develop, main]
   pull_request:
-    branches: [develop, main]
+    # branches: [develop, main]
   workflow_dispatch:
 jobs:
-  Build:
+  BuildCi:
+    name: Build CI job
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -17,44 +17,175 @@ jobs:
           fetch-depth: '0'
           persist-credentials: false
 
-      - name: Use Node.js 16
+      - name: Use Node.js 14
         uses: actions/setup-node@v2-beta
         with:
-          node-version: 16
+          node-version: 14
 
       - name: Check cache
         uses: actions/cache@v2
         id: node-cache # use this to check for `cache-hit` (`steps.node-cache.outputs.cache-hit != 'true'`)
         with:
           path: '**/node_modules'
-          key: ubuntu-latest-node-modules-16-${{ hashFiles('**/package-lock.json') }}
+          key: ubuntu-latest-node-modules-14-${{ hashFiles('**/package-lock.json') }}
 
       - name: Install node modules
         if: steps.node-cache.outputs.cache-hit != 'true'
         run: npm ci
-        env:
-          CI: true
 
-      - name: Build artifact
-        run: npm run build
+      - name: Build, Lint affected apps
+        uses: mansagroup/nrwl-nx-action@v2.0.3
+        with:
+          targets: build,lint
+          affected: 'true'
 
-      - name: Archive artifact
+  BuildArtifacts:
+    needs: [BuildCi]
+    name: Build Artifacts job
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: ['myapp', 'testapp']
+    env:
+      APP_ID: ${{ matrix.app }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
+          persist-credentials: false
+
+      - name: Use Node 14
+        uses: actions/setup-node@v2-beta
+        with:
+          node-version: 14
+
+      - name: Check cache
+        uses: actions/cache@v2
+        id: node-cache # use this to check for `cache-hit` (`steps.node-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: '**/node_modules'
+          key: ubuntu-latest-node-modules-14-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install node modules
+        if: steps.node-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Build app ${{ env.APP_ID }}
+        run: npm run build --${{ env.APP_ID }} --configuration=production
+
+      - name: Archive artifacts
         uses: actions/upload-artifact@v2
         with:
           name: artifacts
-          path: dist
+          path: dist/apps
 
-  PostBuild:
-    name: Post-Build job
-    needs: [Build]
+  #################################################################################
+  # Environment: Preview Channels
+  # Preview URL
+  #################################################################################
+
+  CreatePreview:
+    name: Preview URL
+    needs: [BuildArtifacts]
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: ['myapp']
+    env:
+      APP_ID: ${{ matrix.app }}
+    # environment:
+    #   name: Preview Channels
+    #   url: ${{ steps.action-hosting-deploy.outputs.details_url }}
     steps:
       - uses: actions/checkout@v2
 
       - uses: actions/download-artifact@master
         with:
           name: artifacts
-          path: dist
+          path: dist/apps
 
-      - name: nop
-        run: echo "no operation (nop)"
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: dist
+
+      - name: Prepare deploy
+        run: |
+          cp -f apps/${{ env.APP_ID }}/server/firebase.json ./
+
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        id: action-hosting-deploy-svelte
+        if: 1 == 2
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.SERVICE_ACCOUNT_JSON }}'
+          projectId: '${{ secrets.PROJECT_ID }}'
+          channelId: ${{ env.APP_ID }}
+
+  Release:
+    needs: [BuildArtifacts]
+    name: Release job
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
+          persist-credentials: false
+
+      - name: Use Node.js 14
+        uses: actions/setup-node@v2-beta
+        with:
+          node-version: 14
+
+      - name: Check cache
+        uses: actions/cache@v2
+        id: node-cache # use this to check for `cache-hit` (`steps.node-cache.outputs.cache-hit != 'true'`)
+        with:
+          path: '**/node_modules'
+          key: ubuntu-latest-node-modules-14-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install node modules
+        if: steps.node-cache.outputs.cache-hit != 'true'
+        run: npm ci --production
+
+      - uses: actions/download-artifact@v2
+        with:
+          path: artifacts
+
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: artifacts
+
+      # - name: Prepare artifacts folder
+      #   run: mkdir artifacts
+      #   working-directory: artifacts
+      # - name: Move archived files to artifacts
+      #   working-directory: ${{ github.workspace }}
+      #   run: mv dist/apps/* artifacts/
+      - name: Semantic release
+        run: echo "Skip release" #npx semantic-release
+        # env:
+        #   GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        #   HUSKY_SKIP_HOOKS: 1
+
+      # - name: Archive artifacts
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: dist
+      #     path: dist
+
+  Finalize:
+    needs: [BuildArtifacts, Release]
+    name: Finalize job
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/download-artifact@v2
+        with:
+          path: artifacts
+
+      - name: Display structure of downloaded files
+        run: ls -R
+        working-directory: artifacts
